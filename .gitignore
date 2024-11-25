@@ -1,0 +1,4 @@
+env/
+.env
+blockchain_bkp.bin
+votacao.py
