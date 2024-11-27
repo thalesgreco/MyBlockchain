@@ -20,7 +20,9 @@ Persistence: The blockchain is automatically saved and loaded from a binary file
 ## 📂 Project Structure
 ```
 MyBlockchain/
-├── blockchain.py         # Main code
+├── MyBlockchain.py         # Main code
+├── blockchain.bin        # BlockChain Binary File
+├── requirements.txt      # Requirements to Run the Project
 ├── README.md             # Project documentation
 ```
 
@@ -31,7 +33,7 @@ Ensure Python (3.8 or later) is installed on your system. It's not necessary to 
 ### 2. Run the program
 Simply execute the script:
 ```bash
-python blockchain.py
+python MyBlockchain.py
 ```
 
 
@@ -45,7 +47,8 @@ When you run the program, you'll see the following interactive menu:
 │ [2] 🔍 Find Block                      │
 │ [3] 📜 Show BlockChain                 │
 │ [4] ✅ BlockChain Validation           │
-│ [5] ❌ Exit                            │
+│ [5] 🌐 Start HTTP Server [OFF]         │
+│ [6] ❌ Exit                            │
 └────────────────────────────────────────┘
 ```
 ### Main Features
@@ -54,6 +57,7 @@ New BlockChain Entry: Add a new block with custom information.
 Find Block: Search blocks by index or hash.
 Show BlockChain: List all blocks in the blockchain.
 BlockChain Validation: Validate the integrity of the blockchain.
+BlockChain API: Run a HTTP Server to access and insert blocks via API.
 Exit: Save the blockchain and exit the program.
 
 
