@@ -26,30 +26,30 @@ log_save = {
 }
 
 #FUNCTIONS TO DEAL WITH THE FLASK SERVER TO SERVE THE API5
+#   Start the API on Flask
 def run_flask_server():
     global server_status
-    if server_status == False:
-        if host_global == False:
+    if server_status == False: # Check if the server is already running before start it
+        if host_global == False: # Check if the host is available on WAN or LAN Only
             app.run(host='127.0.0.1', port=server_port, debug=False, use_reloader=False, threaded=True) # Start Server on LAN Only
         else:
             app.run(host='0.0.0.0', port=server_port, debug=False, use_reloader=False, threaded=True) # Start Server on WAN
-        server_status = True
+        server_status = True # Set the server status to Running
     
-
-
-
+#   Function to start the HTTP Server on menu
 def run_http_server():
     global server_status, server_thread
-    if server_status:
+    if server_status: # Check if the server is already running
         print("🚀 HTTP Server is already running!")
         return
     print("🚀 Starting HTTP Server...")
-    server_thread = Thread(target=run_flask_server, daemon=True)
-    server_thread.start()
-    time.sleep(2)
-    print("🚀 HTTP Server is running!...")
+    server_thread = Thread(target=run_flask_server, daemon=True) # Thread to run the HTTP Server in background
+    server_thread.start() # Start the Thread with the HTTP Server  
+    time.sleep(2) # Wait 2s to the HTTP Server run fully
+    print("🚀 HTTP Server is running!...") 
     return
 
+# Function to show the status of the HTTP Server in the Main Menu
 def http_status():
     if server_status:
         return "ON "
@@ -57,6 +57,8 @@ def http_status():
         return "OFF"
 
 #FUNCTIONS TO DEAL WITH THE API
+
+# Route: Show Land Page
 @app.route('/')
 def home():
     return 'Welcome to the MyBlockchain API!'
@@ -242,39 +244,40 @@ def find_block_menu():
 #   OBJECT BLOCK
 class Block:
     def __init__(self, index, timestamp, data, previous_hash):
-        self.index = index
-        self.timestamp = timestamp
-        self.data = data
-        self.previous_hash = previous_hash
-        self.hash = self.calculate_hash()
+        self.index = index # The "ID/Position" of the block in the BlockChain
+        self.timestamp = timestamp # The time of the register of the Block
+        self.data = data # The information saved in the block
+        self.previous_hash = previous_hash # The hash of the previous block
+        self.hash = self.calculate_hash() # The Hash generated for the block using calculate_hash()
 
     #CALCULATE THE SHA256 HASH OF THE BLOCK 
     def calculate_hash(self):
-        sha = hashlib.sha256()
+        sha = hashlib.sha256() # Import the SHA256 from hashlib 
+        #   Insert the information of the block in the SHA256
         sha.update(str(self.index).encode('utf-8') +
                    str(self.timestamp).encode('utf-8') +
                    str(self.data).encode('utf-8') +
                    str(self.previous_hash).encode('utf-8'))
-        return sha.hexdigest()
+        return sha.hexdigest() # Return the hash for the block
 
 #   OBJECT BLOCKCHAIN
 class Blockchain:
     def __init__(self):
-        self.index = 0
-        self.chain = [self.create_genesis_block()]
+        self.index = 0 # Set the index to 0 for the new blockchain
+        self.chain = [self.create_genesis_block()] # Creates the genesis block when creates the blockchain for the first time
 
     # FUNCTION TO CREATE THE GENESIS BLOCK WHEN INITIALIZE A NEW BLOCKCHAIN OBJECT
     def create_genesis_block(self):
-        genesis = Block(self.index, date.datetime.now(), 'Genesis Block', '0')
-        self.index += 1
-        return genesis
+        genesis = Block(self.index, date.datetime.now(), 'Genesis Block', '0') # Creates the Genesis Block object
+        self.index += 1 # Update the index of the blockchain
+        return genesis # Return the genesis block object
 
     # FUNCTION TO ADD A NEW BLOCK IN THE END OF THE BLOCKCHAIN OBJECT
     def add_block(self, new_block):
-        new_block.previous_hash = self.chain[-1].hash
-        new_block.hash = new_block.calculate_hash()
-        self.chain.append(new_block)
-        self.index += 1
+        new_block.previous_hash = self.chain[-1].hash # Get the Previous Block Hash
+        new_block.hash = new_block.calculate_hash() # Calculates the new block hash
+        self.chain.append(new_block) # Insert the new block in the BlockChain
+        self.index += 1 # Increment the index 
 
     # FUNCTION TO GET A BLOCK BY ID/INDEX
     def get_block(self, block_id):
@@ -296,17 +299,18 @@ class Blockchain:
         return
 
     # FUNCTION THAT CHECKS IF THE BLOCKCHAIN IS VALID
+    #   Gets block by block of the blockchain and check if the hashes of previous block and actual block are valid
     def is_valid(self):
         for i in range(1, len(self.chain)):
             current_block = self.chain[i]
             previous_block = self.chain[i-1]
-
-            if current_block.hash != current_block.calculate_hash():
+            # If any block have a incompatible hash return False
+            if current_block.hash != current_block.calculate_hash(): 
                 return False
             if current_block.previous_hash != previous_block.hash:
                 return False
             
-        return True
+        return True # Return True if all the hashes match
     
     # FUNCTION TO SAVE THE BLOCKCHAIN OBJECT IN THE BINARY FILE
     def save(self):
@@ -328,6 +332,7 @@ while True:
         option = int(input('>> '))
         print((20*'====='))
 
+        # Add new block
         if option == 1:
             data = input("Data to be added in the blockchain: ")
             my_blockchain.add_block(Block(my_blockchain.index, date.datetime.now(), data, my_blockchain.chain[-1].hash))
@@ -339,22 +344,28 @@ while True:
             if my_blockchain.is_valid():
                 my_blockchain.save()
 
+        # Open the Search Block menu
         elif option == 2:
             find_block_menu()
             continue
-
+        
+        # Print all blocks in the blockchain
         elif option == 3:
             print_blockchain(my_blockchain.chain)
             continue
-
+        
+        # Check the integrity of the hashes
         elif option == 4:
             print(f'BlockChain Integrity: {my_blockchain.is_valid()}')
             print((20*'====='))
             continue
-
+        
+        # Start the HTTP Server
         elif option == 5:
             run_http_server()
             continue
+        
+        # Exit the BlockChain doing a save and showing the last Integrity Status
         elif option == 6:
             print(f'BlockChain Integrity: {my_blockchain.is_valid()}')
             print((20*'====='))
